@@ -1,5 +1,7 @@
 package com.talbiya.CivicPulseAi.controller;
 
+import com.talbiya.CivicPulseAi.dto.LoginRequest;
+import com.talbiya.CivicPulseAi.dto.LoginResponse;
 import com.talbiya.CivicPulseAi.dto.RegisterRequest;
 import com.talbiya.CivicPulseAi.dto.RegisterResponse;
 import com.talbiya.CivicPulseAi.service.UserService;
@@ -16,5 +18,10 @@ public class AuthController {
     @PostMapping("/register")
     public RegisterResponse register(@RequestBody RegisterRequest request) {
         return userService.registerUser(request);
+    }
+
+    @PostMapping("/login")
+    public LoginResponse login(@RequestBody LoginRequest request) {
+        return userService.loginUser(request);
     }
 }
