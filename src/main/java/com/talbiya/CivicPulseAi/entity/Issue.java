@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "issues")
@@ -37,4 +38,10 @@ public class Issue {
     @ManyToOne
     @JoinColumn(name = "reported_by")
     private User reportedBy;
+
+    @OneToMany(
+            mappedBy = "issue",
+            cascade = CascadeType.ALL
+    )
+    private List<IssueImage> images;
 }
