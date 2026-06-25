@@ -26,4 +26,6 @@ public class IssueResponse {
     private IssueStatus status;
 
     private LocalDateTime createdAt;
+
+    private String reportedBy;
 }

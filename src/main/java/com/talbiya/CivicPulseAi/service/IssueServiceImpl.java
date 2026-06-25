@@ -3,10 +3,14 @@ package com.talbiya.CivicPulseAi.service;
 import com.talbiya.CivicPulseAi.dto.CreateIssueRequest;
 import com.talbiya.CivicPulseAi.dto.IssueResponse;
 import com.talbiya.CivicPulseAi.entity.Issue;
+import com.talbiya.CivicPulseAi.entity.User;
 import com.talbiya.CivicPulseAi.enums.IssueStatus;
 import com.talbiya.CivicPulseAi.repository.IssueRepository;
+import com.talbiya.CivicPulseAi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,8 +21,20 @@ public class IssueServiceImpl implements IssueService {
     @Autowired
     private IssueRepository issueRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public IssueResponse createIssue(CreateIssueRequest request) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
 
         Issue issue = new Issue();
 
@@ -30,6 +46,7 @@ public class IssueServiceImpl implements IssueService {
 
         issue.setStatus(IssueStatus.REPORTED);
         issue.setCreatedAt(LocalDateTime.now());
+        issue.setReportedBy(user);
 
         Issue savedIssue = issueRepository.save(issue);
 
@@ -64,7 +81,10 @@ public class IssueServiceImpl implements IssueService {
                 issue.getLongitude(),
                 issue.getCategory(),
                 issue.getStatus(),
-                issue.getCreatedAt()
+                issue.getCreatedAt(),
+                issue.getReportedBy() != null
+                        ? issue.getReportedBy().getEmail()
+                        : null
         );
     }
 }

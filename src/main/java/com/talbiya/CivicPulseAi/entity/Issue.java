@@ -1,5 +1,6 @@
 package com.talbiya.CivicPulseAi.entity;
 
+import com.talbiya.CivicPulseAi.entity.User;
 import com.talbiya.CivicPulseAi.enums.IssueCategory;
 import com.talbiya.CivicPulseAi.enums.IssueStatus;
 import jakarta.persistence.*;
@@ -32,4 +33,8 @@ public class Issue {
     private IssueStatus status;
 
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "reported_by")
+    private User reportedBy;
 }
