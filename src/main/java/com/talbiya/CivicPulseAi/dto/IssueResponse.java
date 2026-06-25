@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -28,4 +29,6 @@ public class IssueResponse {
     private LocalDateTime createdAt;
 
     private String reportedBy;
+
+    private List<String> imageUrls;
 }

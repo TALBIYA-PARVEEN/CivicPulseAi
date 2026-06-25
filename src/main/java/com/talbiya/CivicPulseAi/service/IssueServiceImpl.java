@@ -1,22 +1,35 @@
 package com.talbiya.CivicPulseAi.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.talbiya.CivicPulseAi.dto.CreateIssueRequest;
+import com.talbiya.CivicPulseAi.dto.ImageUploadResponse;
 import com.talbiya.CivicPulseAi.dto.IssueResponse;
 import com.talbiya.CivicPulseAi.entity.Issue;
+import com.talbiya.CivicPulseAi.entity.IssueImage;
 import com.talbiya.CivicPulseAi.entity.User;
 import com.talbiya.CivicPulseAi.enums.IssueStatus;
+import com.talbiya.CivicPulseAi.repository.IssueImageRepository;
 import com.talbiya.CivicPulseAi.repository.IssueRepository;
 import com.talbiya.CivicPulseAi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class IssueServiceImpl implements IssueService {
+
+    @Autowired
+    private IssueImageRepository issueImageRepository;
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     @Autowired
     private IssueRepository issueRepository;
@@ -73,6 +86,7 @@ public class IssueServiceImpl implements IssueService {
 
     private IssueResponse mapToResponse(Issue issue) {
 
+
         return new IssueResponse(
                 issue.getId(),
                 issue.getTitle(),
@@ -87,4 +101,47 @@ public class IssueServiceImpl implements IssueService {
                         : null
         );
     }
+
+    @Override
+    public ImageUploadResponse uploadImage(
+            Long issueId,
+            MultipartFile file) {
+
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() ->
+                        new RuntimeException("Issue not found"));
+
+        try {
+
+            Map<String, Object> uploadResult =
+                    cloudinary.uploader().upload(
+                            file.getBytes(),
+                            ObjectUtils.emptyMap()
+                    );
+
+            String imageUrl =
+                    uploadResult.get("secure_url").toString();
+
+            IssueImage image = new IssueImage();
+
+            image.setIssue(issue);
+            image.setImageUrl(imageUrl);
+
+            IssueImage saved =
+                    issueImageRepository.save(image);
+
+            return new ImageUploadResponse(
+                    saved.getId(),
+                    saved.getImageUrl()
+            );
+
+        } catch (Exception e) {
+            throw new RuntimeException("Image upload failed");
+        }
+    }
+
+
+
+
+
 }
