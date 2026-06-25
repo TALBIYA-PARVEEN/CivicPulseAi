@@ -1,9 +1,7 @@
 package com.talbiya.CivicPulseAi.service;
 
-import com.talbiya.CivicPulseAi.dto.LoginRequest;
-import com.talbiya.CivicPulseAi.dto.LoginResponse;
-import com.talbiya.CivicPulseAi.dto.RegisterRequest;
-import com.talbiya.CivicPulseAi.dto.RegisterResponse;
+import com.talbiya.CivicPulseAi.dto.*;
+import com.talbiya.CivicPulseAi.entity.Issue;
 import com.talbiya.CivicPulseAi.entity.User;
 import com.talbiya.CivicPulseAi.enums.Role;
 import com.talbiya.CivicPulseAi.repository.UserRepository;
@@ -68,4 +66,6 @@ public class UserServiceImpl implements UserService {
 
         return new LoginResponse(token);
     }
+
+
 }

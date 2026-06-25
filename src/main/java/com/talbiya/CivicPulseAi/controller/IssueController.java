@@ -3,6 +3,7 @@ package com.talbiya.CivicPulseAi.controller;
 import com.talbiya.CivicPulseAi.dto.CreateIssueRequest;
 import com.talbiya.CivicPulseAi.dto.ImageUploadResponse;
 import com.talbiya.CivicPulseAi.dto.IssueResponse;
+import com.talbiya.CivicPulseAi.dto.UpdateIssueStatusRequest;
 import com.talbiya.CivicPulseAi.service.IssueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -43,5 +44,14 @@ public class IssueController {
             @RequestParam("file") MultipartFile file) {
 
         return issueService.uploadImage(issueId, file);
+    }
+
+    @PutMapping("/{issueId}/status")
+    public IssueResponse updateStatus(
+            @PathVariable Long issueId,
+            @RequestBody UpdateIssueStatusRequest request) {
+
+        return issueService
+                .updateIssueStatus(issueId, request);
     }
 }

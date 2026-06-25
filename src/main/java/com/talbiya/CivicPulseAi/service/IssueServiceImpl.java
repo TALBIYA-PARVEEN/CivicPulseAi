@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.talbiya.CivicPulseAi.dto.CreateIssueRequest;
 import com.talbiya.CivicPulseAi.dto.ImageUploadResponse;
 import com.talbiya.CivicPulseAi.dto.IssueResponse;
+import com.talbiya.CivicPulseAi.dto.UpdateIssueStatusRequest;
 import com.talbiya.CivicPulseAi.entity.Issue;
 import com.talbiya.CivicPulseAi.entity.IssueImage;
 import com.talbiya.CivicPulseAi.entity.User;
@@ -87,6 +88,12 @@ public class IssueServiceImpl implements IssueService {
     private IssueResponse mapToResponse(Issue issue) {
 
 
+        List<String> imageUrls =
+                issue.getImages()
+                        .stream()
+                        .map(IssueImage::getImageUrl)
+                        .toList();
+
         return new IssueResponse(
                 issue.getId(),
                 issue.getTitle(),
@@ -98,7 +105,8 @@ public class IssueServiceImpl implements IssueService {
                 issue.getCreatedAt(),
                 issue.getReportedBy() != null
                         ? issue.getReportedBy().getEmail()
-                        : null
+                        : null,
+                imageUrls
         );
     }
 
@@ -140,6 +148,22 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
+    @Override
+    public IssueResponse updateIssueStatus(
+            Long issueId,
+            UpdateIssueStatusRequest request) {
+
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() ->
+                        new RuntimeException("Issue not found"));
+
+        issue.setStatus(request.getStatus());
+
+        Issue updatedIssue =
+                issueRepository.save(issue);
+
+        return mapToResponse(updatedIssue);
+    }
 
 
 
