@@ -1,9 +1,6 @@
 package com.talbiya.CivicPulseAi.service;
 
-import com.talbiya.CivicPulseAi.dto.CreateIssueRequest;
-import com.talbiya.CivicPulseAi.dto.ImageUploadResponse;
-import com.talbiya.CivicPulseAi.dto.IssueResponse;
-import com.talbiya.CivicPulseAi.dto.UpdateIssueStatusRequest;
+import com.talbiya.CivicPulseAi.dto.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -23,4 +20,6 @@ public interface IssueService {
     IssueResponse updateIssueStatus(
             Long issueId,
             UpdateIssueStatusRequest request);
+
+    VerificationResponse verifyIssue(Long issueId);
 }

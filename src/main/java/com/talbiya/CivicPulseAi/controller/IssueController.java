@@ -1,9 +1,6 @@
 package com.talbiya.CivicPulseAi.controller;
 
-import com.talbiya.CivicPulseAi.dto.CreateIssueRequest;
-import com.talbiya.CivicPulseAi.dto.ImageUploadResponse;
-import com.talbiya.CivicPulseAi.dto.IssueResponse;
-import com.talbiya.CivicPulseAi.dto.UpdateIssueStatusRequest;
+import com.talbiya.CivicPulseAi.dto.*;
 import com.talbiya.CivicPulseAi.service.IssueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -53,5 +50,12 @@ public class IssueController {
 
         return issueService
                 .updateIssueStatus(issueId, request);
+    }
+
+    @PostMapping("/{issueId}/verify")
+    public VerificationResponse verifyIssue(
+            @PathVariable Long issueId) {
+
+        return issueService.verifyIssue(issueId);
     }
 }

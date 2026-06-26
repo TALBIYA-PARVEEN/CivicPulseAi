@@ -2,17 +2,16 @@ package com.talbiya.CivicPulseAi.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.talbiya.CivicPulseAi.dto.CreateIssueRequest;
-import com.talbiya.CivicPulseAi.dto.ImageUploadResponse;
-import com.talbiya.CivicPulseAi.dto.IssueResponse;
-import com.talbiya.CivicPulseAi.dto.UpdateIssueStatusRequest;
+import com.talbiya.CivicPulseAi.dto.*;
 import com.talbiya.CivicPulseAi.entity.Issue;
 import com.talbiya.CivicPulseAi.entity.IssueImage;
 import com.talbiya.CivicPulseAi.entity.User;
+import com.talbiya.CivicPulseAi.entity.Verification;
 import com.talbiya.CivicPulseAi.enums.IssueStatus;
 import com.talbiya.CivicPulseAi.repository.IssueImageRepository;
 import com.talbiya.CivicPulseAi.repository.IssueRepository;
 import com.talbiya.CivicPulseAi.repository.UserRepository;
+import com.talbiya.CivicPulseAi.repository.VerificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
@@ -25,6 +24,9 @@ import java.util.Map;
 
 @Service
 public class IssueServiceImpl implements IssueService {
+
+    @Autowired
+    private VerificationRepository verificationRepository;
 
     @Autowired
     private IssueImageRepository issueImageRepository;
@@ -165,6 +167,47 @@ public class IssueServiceImpl implements IssueService {
         return mapToResponse(updatedIssue);
     }
 
+
+    @Override
+    public VerificationResponse verifyIssue(Long issueId) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() ->
+                        new RuntimeException("Issue not found"));
+
+        if (verificationRepository
+                .existsByIssueAndUser(issue, user)) {
+
+            throw new RuntimeException(
+                    "You already verified this issue");
+        }
+
+        Verification verification =
+                new Verification();
+
+        verification.setIssue(issue);
+        verification.setUser(user);
+        verification.setVerifiedAt(LocalDateTime.now());
+
+        verificationRepository.save(verification);
+
+        long count =
+                verificationRepository.countByIssue(issue);
+
+        return new VerificationResponse(
+                issueId,
+                (int) count
+        );
+    }
 
 
 

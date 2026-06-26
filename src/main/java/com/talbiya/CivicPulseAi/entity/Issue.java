@@ -44,4 +44,16 @@ public class Issue {
             cascade = CascadeType.ALL
     )
     private List<IssueImage> images;
+
+    @OneToMany(
+            mappedBy = "issue",
+            cascade = CascadeType.ALL
+    )
+    private List<Verification> verifications;
+
+    @OneToMany(
+            mappedBy = "issue",
+            cascade = CascadeType.ALL
+    )
+    private List<Comment> comments;
 }
