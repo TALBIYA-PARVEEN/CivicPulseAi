@@ -7,6 +7,7 @@ import com.talbiya.CivicPulseAi.entity.*;
 import com.talbiya.CivicPulseAi.enums.IssueStatus;
 import com.talbiya.CivicPulseAi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +19,9 @@ import java.util.Map;
 
 @Service
 public class IssueServiceImpl implements IssueService {
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @Autowired
     private NotificationService notificationService;
@@ -170,6 +174,14 @@ public class IssueServiceImpl implements IssueService {
                         updatedIssue.getTitle() +
                         "' moved to " +
                         updatedIssue.getStatus()
+        );
+
+        messagingTemplate.convertAndSend(
+                "/topic/issues",
+                new IssueStatusUpdateMessage(
+                        updatedIssue.getId(),
+                        updatedIssue.getStatus().name()
+                )
         );
 
         return mapToResponse(updatedIssue);
