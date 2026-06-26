@@ -20,6 +20,9 @@ import java.util.Map;
 public class IssueServiceImpl implements IssueService {
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private CommentRepository commentRepository;
 
     @Autowired
@@ -160,6 +163,14 @@ public class IssueServiceImpl implements IssueService {
 
         Issue updatedIssue =
                 issueRepository.save(issue);
+
+        notificationService.createNotification(
+                updatedIssue.getReportedBy(),
+                "Your issue '" +
+                        updatedIssue.getTitle() +
+                        "' moved to " +
+                        updatedIssue.getStatus()
+        );
 
         return mapToResponse(updatedIssue);
     }
