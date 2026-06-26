@@ -22,4 +22,11 @@ public interface IssueService {
             UpdateIssueStatusRequest request);
 
     VerificationResponse verifyIssue(Long issueId);
+
+
+    CommentResponse addComment(
+            Long issueId,
+            CreateCommentRequest request);
+    List<CommentResponse> getCommentsByIssue(
+            Long issueId);
 }

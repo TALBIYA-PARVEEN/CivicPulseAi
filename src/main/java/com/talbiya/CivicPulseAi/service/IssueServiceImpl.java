@@ -3,15 +3,9 @@ package com.talbiya.CivicPulseAi.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.talbiya.CivicPulseAi.dto.*;
-import com.talbiya.CivicPulseAi.entity.Issue;
-import com.talbiya.CivicPulseAi.entity.IssueImage;
-import com.talbiya.CivicPulseAi.entity.User;
-import com.talbiya.CivicPulseAi.entity.Verification;
+import com.talbiya.CivicPulseAi.entity.*;
 import com.talbiya.CivicPulseAi.enums.IssueStatus;
-import com.talbiya.CivicPulseAi.repository.IssueImageRepository;
-import com.talbiya.CivicPulseAi.repository.IssueRepository;
-import com.talbiya.CivicPulseAi.repository.UserRepository;
-import com.talbiya.CivicPulseAi.repository.VerificationRepository;
+import com.talbiya.CivicPulseAi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
@@ -24,6 +18,9 @@ import java.util.Map;
 
 @Service
 public class IssueServiceImpl implements IssueService {
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private VerificationRepository verificationRepository;
@@ -210,5 +207,60 @@ public class IssueServiceImpl implements IssueService {
     }
 
 
+    @Override
+    public CommentResponse addComment(
+            Long issueId,
+            CreateCommentRequest request) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() ->
+                        new RuntimeException("Issue not found"));
+
+        Comment comment = new Comment();
+
+        comment.setCommentText(request.getCommentText());
+        comment.setCreatedAt(LocalDateTime.now());
+        comment.setIssue(issue);
+        comment.setUser(user);
+
+        Comment saved =
+                commentRepository.save(comment);
+
+        return new CommentResponse(
+                saved.getId(),
+                saved.getCommentText(),
+                saved.getUser().getEmail(),
+                saved.getCreatedAt()
+        );
+    }
+
+    @Override
+    public List<CommentResponse> getCommentsByIssue(
+            Long issueId) {
+
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() ->
+                        new RuntimeException("Issue not found"));
+
+        return commentRepository.findByIssue(issue)
+                .stream()
+                .map(comment ->
+                        new CommentResponse(
+                                comment.getId(),
+                                comment.getCommentText(),
+                                comment.getUser().getEmail(),
+                                comment.getCreatedAt()
+                        ))
+                .toList();
+    }
 
 }

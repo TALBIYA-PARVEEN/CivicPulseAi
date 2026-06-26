@@ -58,4 +58,23 @@ public class IssueController {
 
         return issueService.verifyIssue(issueId);
     }
+
+
+    @PostMapping("/{issueId}/comments")
+    public CommentResponse addComment(
+            @PathVariable Long issueId,
+            @RequestBody CreateCommentRequest request) {
+
+        return issueService.addComment(
+                issueId,
+                request
+        );
+    }
+
+    @GetMapping("/{issueId}/comments")
+    public List<CommentResponse> getComments(
+            @PathVariable Long issueId) {
+
+        return issueService.getCommentsByIssue(issueId);
+    }
 }
