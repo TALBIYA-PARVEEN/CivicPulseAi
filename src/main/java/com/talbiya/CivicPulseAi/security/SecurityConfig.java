@@ -25,12 +25,17 @@ public class SecurityConfig {
 //                        .anyRequest().authenticated()
 //                )
                 .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers(
+//                                "/api/auth/**",
+//                                "/websocket-test.html",
+//                                "/ws/**"
+//                        ).permitAll()
+//                        .anyRequest().authenticated()
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/websocket-test.html",
-                                "/ws/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                                "/api/ai/**"
+                        )
+                        .permitAll()
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
