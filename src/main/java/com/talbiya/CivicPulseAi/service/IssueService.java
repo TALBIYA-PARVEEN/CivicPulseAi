@@ -2,8 +2,10 @@ package com.talbiya.CivicPulseAi.service;
 
 import com.talbiya.CivicPulseAi.dto.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.Map;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public interface IssueService {
 
@@ -29,4 +31,6 @@ public interface IssueService {
             CreateCommentRequest request);
     List<CommentResponse> getCommentsByIssue(
             Long issueId);
+
+
 }

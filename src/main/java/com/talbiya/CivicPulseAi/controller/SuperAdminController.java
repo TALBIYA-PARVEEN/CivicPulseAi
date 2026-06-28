@@ -3,7 +3,7 @@ package com.talbiya.CivicPulseAi.controller;
 import com.talbiya.CivicPulseAi.dto.MapIssueDTO;
 import com.talbiya.CivicPulseAi.dto.SuperAdminDashboardDTO;
 import com.talbiya.CivicPulseAi.entity.AdminRequest;
-import com.talbiya.CivicPulseAi.service.SuperAdminDashboardService;
+import com.talbiya.CivicPulseAi.service.SuperAdminDashboardServiceImpl;
 import com.talbiya.CivicPulseAi.service.SuperAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +19,7 @@ public class SuperAdminController {
     private SuperAdminService superAdminService;
 
     @Autowired
-    private SuperAdminDashboardService dashboardService;
+    private SuperAdminDashboardServiceImpl dashboardService;
 
     // =========================
     // ADMIN REQUESTS

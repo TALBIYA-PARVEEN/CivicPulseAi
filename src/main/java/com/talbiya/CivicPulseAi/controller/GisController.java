@@ -1,34 +1,20 @@
 package com.talbiya.CivicPulseAi.controller;
 
-import com.talbiya.CivicPulseAi.dto.MapIssueDTO;
 import com.talbiya.CivicPulseAi.service.GisService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/gis")
+@RequestMapping("/api/gis")
 public class GisController {
 
-    @Autowired
-    private GisService gisService;
+    private final GisService gisService;
 
-    @GetMapping("/map-data")
-    public List<MapIssueDTO> getMapData() {
-        return gisService.getAllIssuesForMap();
+    public GisController(GisService gisService) {
+        this.gisService = gisService;
     }
 
     @GetMapping("/heatmap")
-    public Map<String, Long> getHeatmap() {
-        return gisService.getIssueHeatByArea();
-    }
-
-    @GetMapping("/overdue-heatmap")
-    public Map<String, Long> getOverdueHeatmap() {
+    public Object getHeatmap() {
         return gisService.getOverdueHeatmap();
     }
 }

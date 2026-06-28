@@ -3,6 +3,7 @@ package com.talbiya.CivicPulseAi.entity;
 import com.talbiya.CivicPulseAi.entity.User;
 import com.talbiya.CivicPulseAi.enums.IssueCategory;
 import com.talbiya.CivicPulseAi.enums.IssueStatus;
+import com.talbiya.CivicPulseAi.enums.Priority;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -84,6 +85,9 @@ public class Issue {
 
     private String city;
     private String area;
+
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
 
 
 }

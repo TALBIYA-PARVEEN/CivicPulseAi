@@ -1,10 +1,12 @@
 package com.talbiya.CivicPulseAi.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class MapIssueDTO {
@@ -14,5 +16,5 @@ public class MapIssueDTO {
     private String status;
     private Double latitude;
     private Double longitude;
-    private String severity;
+    private String aiSeverity;   // IMPORTANT: must match entity type
 }
