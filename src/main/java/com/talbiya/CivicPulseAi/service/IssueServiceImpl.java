@@ -5,6 +5,8 @@ import com.cloudinary.utils.ObjectUtils;
 import com.talbiya.CivicPulseAi.dto.*;
 import com.talbiya.CivicPulseAi.entity.*;
 import com.talbiya.CivicPulseAi.enums.IssueStatus;
+import com.talbiya.CivicPulseAi.enums.RequestStatus;
+import com.talbiya.CivicPulseAi.enums.Role;
 import com.talbiya.CivicPulseAi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -12,13 +14,28 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
+import com.talbiya.CivicPulseAi.entity.AdminRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class IssueServiceImpl implements IssueService {
+
+    @Autowired
+    private AdminRequestRepository adminRequestRepository;
+
+
+    @Autowired
+    private DuplicateDetectionAiService duplicateDetectionAiService;
+
+    @Autowired
+    private DuplicateDetectionService duplicateDetectionService;
+
+    @Autowired
+    private AiTriageService aiTriageService;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -53,8 +70,7 @@ public class IssueServiceImpl implements IssueService {
         String email = authentication.getName();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Issue issue = new Issue();
 
@@ -63,10 +79,79 @@ public class IssueServiceImpl implements IssueService {
         issue.setLatitude(request.getLatitude());
         issue.setLongitude(request.getLongitude());
         issue.setCategory(request.getCategory());
+        issue.setCity(request.getCity());
+        issue.setArea(request.getArea());
 
         issue.setStatus(IssueStatus.REPORTED);
         issue.setCreatedAt(LocalDateTime.now());
         issue.setReportedBy(user);
+
+        LocalDateTime dueDate = issue.getCreatedAt();
+
+        switch (request.getCategory()) {
+            case WATER -> dueDate = dueDate.plusDays(3);
+            case ROAD -> dueDate = dueDate.plusDays(7);
+            case ELECTRICITY -> dueDate = dueDate.plusDays(2);
+            default -> dueDate = dueDate.plusDays(5);
+        }
+
+        issue.setDueDate(dueDate);
+
+        Optional<User> adminOpt =
+                userRepository.findByRoleAndCityAndArea(Role.ADMIN, request.getCity(), request.getArea());
+
+        if (adminOpt.isPresent()) {
+
+            issue.setAssignedAdmin(adminOpt.get());
+
+        } else {
+
+            issue.setAssignedAdmin(null); // IMPORTANT
+
+            AdminRequest req = adminRequestRepository
+                    .findByCityAndArea(request.getCity(), request.getArea())
+                    .orElse(null);
+
+            if (req == null) {
+
+                req = new AdminRequest();
+                req.setCity(request.getCity());
+                req.setArea(request.getArea());
+                req.setIssueCount(1);
+                req.setStatus(RequestStatus.PENDING);
+                req.setCreatedAt(LocalDateTime.now());
+
+            } else {
+
+                req.setIssueCount(req.getIssueCount() + 1);
+                req.setUpdatedAt(LocalDateTime.now());
+            }
+
+            adminRequestRepository.save(req);
+        }
+
+
+        // ============================
+        // 🧠 AI TRIAGE (REAL MAGIC)
+        // ============================
+        try {
+            Map<String, String> aiResult =
+                    aiTriageService.analyzeIssue(
+                            request.getTitle(),
+                            request.getDescription()
+                    );
+
+            issue.setAiSeverity(aiResult.get("severity"));
+            issue.setAiDepartment(aiResult.get("department"));
+
+        } catch (Exception e) {
+
+        System.out.println("AI ERROR:");
+        e.printStackTrace();
+
+        issue.setAiSeverity("UNKNOWN");
+        issue.setAiDepartment("OTHER");
+    }
 
         Issue savedIssue = issueRepository.save(issue);
 
@@ -99,6 +184,9 @@ public class IssueServiceImpl implements IssueService {
                         .stream()
                         .map(IssueImage::getImageUrl)
                         .toList();
+        Integer verificationCount =
+                (int) verificationRepository
+                        .countByIssue(issue);
 
         return new IssueResponse(
                 issue.getId(),
@@ -112,7 +200,12 @@ public class IssueServiceImpl implements IssueService {
                 issue.getReportedBy() != null
                         ? issue.getReportedBy().getEmail()
                         : null,
-                imageUrls
+                imageUrls,
+                issue.getAiSeverity(),
+                issue.getAiDepartment(),
+                issue.getIsDuplicate(),
+                issue.getMasterIssueId(),
+                verificationCount
         );
     }
 
@@ -164,6 +257,10 @@ public class IssueServiceImpl implements IssueService {
                         new RuntimeException("Issue not found"));
 
         issue.setStatus(request.getStatus());
+
+        if (request.getStatus().name().equals("RESOLVED")) {
+            issue.setResolvedAt(LocalDateTime.now());
+        }
 
         Issue updatedIssue =
                 issueRepository.save(issue);

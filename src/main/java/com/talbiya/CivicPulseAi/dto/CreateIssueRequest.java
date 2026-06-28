@@ -15,4 +15,8 @@ public class CreateIssueRequest {
     private Double longitude;
 
     private IssueCategory category;
+
+    private String city;
+
+    private String area;
 }

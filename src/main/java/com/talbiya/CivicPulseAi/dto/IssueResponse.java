@@ -31,4 +31,16 @@ public class IssueResponse {
     private String reportedBy;
 
     private List<String> imageUrls;
+
+    private String aiSeverity;
+
+    private String aiDepartment;
+
+    private Boolean isDuplicate;
+
+    private Long masterIssueId;
+
+    private Integer verificationCount;
+
+
 }

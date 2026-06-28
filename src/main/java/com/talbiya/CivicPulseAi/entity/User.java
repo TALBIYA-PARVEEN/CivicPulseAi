@@ -21,4 +21,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
     private LocalDateTime createdAt=LocalDateTime.now();
+
+    private String city;
+    private String area;
 }

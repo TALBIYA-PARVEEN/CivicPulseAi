@@ -19,24 +19,25 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http)
             throws Exception {
 
+
         http.csrf(csrf -> csrf.disable())
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/auth/**").permitAll()
-//                        .anyRequest().authenticated()
-//                )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+//                .authorizeHttpRequests(auth -> auth
 //                        .requestMatchers(
 //                                "/api/auth/**",
 //                                "/websocket-test.html",
 //                                "/ws/**"
 //                        ).permitAll()
 //                        .anyRequest().authenticated()
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/api/ai/**"
-                        )
-                        .permitAll()
-                )
+//                        .requestMatchers(
+//                                "/api/auth/**",
+//                                "/api/ai/**"
+//                        )
+//                        .permitAll()
+//                )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS))

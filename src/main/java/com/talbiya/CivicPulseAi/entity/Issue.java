@@ -7,12 +7,29 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "issues")
 @Data
 public class Issue {
+
+    @ManyToOne
+    @JoinColumn(name = "assigned_admin_id")
+    private User assignedAdmin;
+
+    @Column(name = "is_duplicate")
+    private Boolean isDuplicate = false;
+
+    @Column(name = "master_issue_id")
+    private Long masterIssueId;
+
+    @Column(name = "ai_severity")
+    private String aiSeverity;
+
+    @Column(name = "ai_department")
+    private String aiDepartment;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,7 +60,7 @@ public class Issue {
             mappedBy = "issue",
             cascade = CascadeType.ALL
     )
-    private List<IssueImage> images;
+    private List<IssueImage> images = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "issue",
@@ -56,4 +73,17 @@ public class Issue {
             cascade = CascadeType.ALL
     )
     private List<Comment> comments;
+
+    private LocalDateTime dueDate;
+    private LocalDateTime resolvedAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    private String city;
+    private String area;
+
+
 }
